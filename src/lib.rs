@@ -1,5 +1,6 @@
 use std::{collections::HashMap, error::Error, fs::File, io::Read, path::PathBuf, str::from_utf8};
 
+use directories::BaseDirs;
 use rand::seq::SliceRandom;
 use regex::Regex;
 use rust_embed::RustEmbed;
@@ -7,6 +8,7 @@ use rust_embed::RustEmbed;
 use crate::bubbles::{BubbleType, SpeechBubble};
 
 pub mod bubbles;
+pub mod convert;
 pub mod errors;
 
 #[derive(RustEmbed, Debug)]
@@ -193,4 +195,13 @@ pub fn format_character(
 /// Print only the character
 pub fn print_character(chara: &Chara) -> String {
     parse_character(chara, "  ")
+}
+
+pub fn check_config_dir() -> Result<PathBuf, Box<dyn Error>> {
+    let conf_dir = BaseDirs::new().unwrap().config_dir().join("charasay");
+    if !conf_dir.exists() {
+        let conf_dir_c = conf_dir.clone();
+        std::fs::create_dir_all(conf_dir_c)?;
+    }
+    Ok(conf_dir)
 }

@@ -1,11 +1,14 @@
+use charasay::errors::CustomError;
 use std::{
     error::Error,
     io::{stdin, stdout, Read},
     path::PathBuf,
 };
-use charasay::errors::CustomError;
 
-use charasay::{bubbles::BubbleType, format_character, print_character, Chara, BUILTIN_CHARA};
+use charasay::{
+    bubbles::BubbleType, check_config_dir, convert::convert_png_to_chara, format_character,
+    print_character, Chara, BUILTIN_CHARA,
+};
 use clap::{Args, Command, CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Generator, Shell};
 use textwrap::termwidth;
@@ -166,7 +169,9 @@ fn print_characters(
             // Print the specified character
             print_specified_character(&messages, &s, max_width, bubble_type)?;
         }
-        Charas { file: Some(path), .. } => {
+        Charas {
+            file: Some(path), ..
+        } => {
             // Print the character from a file
             print_character_from_file(&messages, path.to_str().unwrap(), max_width, bubble_type)?;
         }
@@ -252,7 +257,18 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("{}", print_character(&chara));
         }
 
-        Commands::Convert { image: _ } => todo!(),
+        Commands::Convert { image } => {
+            let filename = match image.file_name() {
+                Some(filename) => filename.to_str().unwrap(),
+                None => {
+                    return Err(Box::new(CustomError::InvalidPath(image)) as Box<dyn Error>);
+                }
+            };
+            // get charas file path
+            let config_dir = check_config_dir()?;
+            // convert png to chara
+            convert_png_to_chara(filename, config_dir.as_path())?;
+        }
     }
     Ok(())
 }

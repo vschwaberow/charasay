@@ -7,6 +7,8 @@ pub enum CustomError {
     IoError(std::io::Error),
     // Represents a UTF-8 decoding error
     Utf8Error(std::str::Utf8Error),
+    // Pathbuf error
+    InvalidPath(std::path::PathBuf),
 }
 
 impl fmt::Display for CustomError {
@@ -16,6 +18,8 @@ impl fmt::Display for CustomError {
             CustomError::IoError(err) => write!(f, "IO error: {}", err),
             // Format the error message as "UTF-8 error: <error>"
             CustomError::Utf8Error(err) => write!(f, "UTF-8 error: {}", err),
+            // Format the error message as "Invalid path: <path>"
+            CustomError::InvalidPath(path) => write!(f, "Invalid path: {}", path.display()),
         }
     }
 }
